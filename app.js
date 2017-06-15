@@ -5,7 +5,9 @@
 */
 class App{
 	constructor(){
-		this.student=[];		
+		this.student=[];
+
+		this.listStudent = [];		
 	}
 	render(html,component){
 		component.innerHTML=html;
@@ -29,11 +31,13 @@ class App{
 					lastname char(50)
 				)
 			`;
+			tx.executeSql('DROP TABLE IF EXISTS student');
 			tx.executeSql(sql);
-		     //tx.executeSql('DROP TABLE IF EXISTS DEMO');
+		     
 		     //tx.executeSql('CREATE TABLE IF NOT EXISTS DEMO (id unique, data)');
-		     //tx.executeSql('INSERT INTO DEMO (id, data) VALUES (1, "First row")');
-		     //tx.executeSql('INSERT INTO DEMO (id, data) VALUES (2, "Second row")');
+		     tx.executeSql('INSERT INTO student (id, firstname, lastname) VALUES ("123", "Jason", "Lam")');
+		     tx.executeSql('INSERT INTO student (id, firstname, lastname) VALUES ("456", "Jason", "Alfar")');
+
 		}
 
 		function errorCB(err) {
@@ -41,7 +45,7 @@ class App{
 		}
 
 		function successCB() {
-		    console.log("success!");
+		    console.log("success!");		    
 		}
 
 		var db = window.openDatabase("Database", "1.0", "PhoneGap Demo", 200000);
@@ -83,6 +87,7 @@ class App{
 	deleteStudent(){
 		//SQL: DELETE FROM student WHERE firstname='Jason'
 	}
+
 }
 
 class Component extends App{
@@ -96,6 +101,7 @@ class Component extends App{
 			<h1>Create</h1>
 			<hr>
 			<h1>Read</h1>
+				<div id="read"></div>
 			<hr>
 			<h1>Update</h1>
 			<hr>
@@ -103,7 +109,45 @@ class Component extends App{
 			<hr>
 		`;
 		this.render(html,document.querySelector('#app'));
+		this.read();
 	}
+	read(){
+		let html = `
+			<div>
+				ID: <input type="text" size="5" /> <button>Read</button>
+			</div>
+			<div>
+				<ul id="listRead"></ul>
+			</div>
+
+		`;
+		this.render(html,document.querySelector('#read'));
+		this.populateListRead();
+	}
+
+	populateListRead(){
+		let html = ``;
+		var db = window.openDatabase("Database", "1.0", "PhoneGap Demo", 200000);
+		db.transaction(function(tx){
+			let sql = `SELECT lastname FROM student`;
+			tx.executeSql(sql,[],function(tx,results){
+				// console.log(results.rows);
+				component.listStudent = results.rows;
+				component.displayListRead();
+			},function(){});
+		}, function(){}, function(){});
+		
+	}
+
+	displayListRead(){		
+		let html = ``;
+		for(let i=0;i<this.listStudent.length;i++){
+			html+=`
+				<li>${component.listStudent[i].lastname}</li>			
+			`;	
+		}		
+		this.render(html,document.querySelector('#listRead'));		
+	}	
 }
 
 let component = new Component();
